@@ -1,7 +1,9 @@
 
 # identity-management-service-proxy
 
-This is a placeholder README.md for a new repository
+Proxy for the Identity Management Service (IDMS). Serves as the IDMS in a 
+secondary API Hub environment. Forwards calls to the real IDMS via HODS Proxy
+and Scrubbing Centre.
 
 ### License
 

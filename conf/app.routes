@@ -1,1 +1,2 @@
 # microservice specific routes
+-> /identity uk.gov.hmrc.identitymanagementserviceproxy.controller.IdmsRouter

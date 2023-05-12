@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.identitymanagementserviceproxy.config
+package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
-import com.google.inject.AbstractModule
-import uk.gov.hmrc.identitymanagementserviceproxy.controller.{IdmsController, IdmsRouter}
+import play.api.routing.Router.Routes
+import play.api.routing.SimpleRouter
 
-class Module extends AbstractModule {
+import javax.inject.Inject
 
-  override def configure(): Unit = {
-    bind(classOf[AppConfig]).asEagerSingleton()
-    bind(classOf[IdmsRouter]).asEagerSingleton()
-    bind(classOf[IdmsController]).asEagerSingleton()
+class IdmsRouter @Inject()(idmsController: IdmsController) extends SimpleRouter {
+
+  override def routes: Routes = {
+    case _ => idmsController.forward
   }
+
 }

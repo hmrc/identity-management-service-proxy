@@ -39,11 +39,7 @@ class IdmsController @Inject()(
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
     def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
-
       val url = url"${s"$targetUrl$relativePath"}"
-      Console.println(s"targetUrl:$targetUrl")
-      Console.println(s"relativePath:$relativePath}")
-      Console.println(s"url:$url")
       method match {
         case "GET" => httpClient.get(url)
         case "POST" => httpClient.post(url)
@@ -61,7 +57,7 @@ class IdmsController @Inject()(
     implicit request =>
 
       var builder = httpClient
-        .httpVerb(request.method, stripOriginalContextRoot(request.path))
+        .httpVerb(request.method, request.path.replaceFirst("/identity-management-service-proxy", ""))
 
       request.headers.get(CONTENT_TYPE) match {
         case Some(ContentTypes.JSON) =>
@@ -85,11 +81,6 @@ class IdmsController @Inject()(
               body = buildBody(response.body, response.headers)
             )
         )
-  }
-
-
-  private def stripOriginalContextRoot(path: String) = {
-    path.replaceFirst("/[0-9a-zA-Z-]*", "")
   }
 
   private def buildBody(body: String, headers: Map[String, Seq[String]]): HttpEntity = {

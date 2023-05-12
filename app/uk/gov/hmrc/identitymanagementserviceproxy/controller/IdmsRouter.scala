@@ -24,10 +24,7 @@ import javax.inject.Inject
 class IdmsRouter @Inject()(idmsController: IdmsController) extends SimpleRouter {
 
   override def routes: Routes = {
-    case _ => {
-      Console.println("Routing...")
-      idmsController.forward
-    }
+    case _ => idmsController.forward
   }
 
 }

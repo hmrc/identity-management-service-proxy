@@ -39,14 +39,8 @@ class IdmsControllerSpec extends AsyncFreeSpec
 
   "POST request" - {
     "must be forwarded with headers" in {
-      val responseBody =
-        """
-          |{
-          |  "jam": "scones"
-          |}
-          |""".stripMargin
-
       val requestBody = """{"cheese":"crackers"}"""
+      val responseBody = """{"jam": "scones"}"""
 
       stubFor(
         post(urlEqualTo("/identity-management-service-stubs/identity"))

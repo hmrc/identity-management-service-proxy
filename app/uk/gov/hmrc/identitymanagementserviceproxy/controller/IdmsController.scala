@@ -18,10 +18,11 @@ package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import akka.util.{ByteString, CompactByteString}
 import play.api.Logging
-import play.api.http.HttpEntity
+import play.api.http.{ContentTypes, HttpEntity}
+import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -37,9 +38,9 @@ class IdmsController @Inject()(
                                 servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
-    def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier) = {
+    def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
 
-      val url = url"${s"${targetUrl}${relativePath}"}"
+      val url = url"${s"$targetUrl$relativePath"}"
       Console.println(s"targetUrl:$targetUrl")
       Console.println(s"relativePath:$relativePath}")
       Console.println(s"url:$url")
@@ -61,14 +62,16 @@ class IdmsController @Inject()(
 
       var builder = httpClient
         .httpVerb(request.method, stripOriginalContextRoot(request.path))
-        .withBody(request.body)
+
+      request.headers.get(CONTENT_TYPE) match {
+        case Some(ContentTypes.JSON) =>
+          builder = builder.withBody(Json.parse(request.body.toArray))
+        case _ =>
+          builder = builder.withBody(request.body)
+      }
 
       if (request.headers.hasHeader(ACCEPT)) {
         builder = builder.setHeader((ACCEPT, request.headers.get(ACCEPT).get))
-      }
-
-      if (request.headers.hasHeader(CONTENT_TYPE)) {
-        builder = builder.setHeader((CONTENT_TYPE, request.headers.get(CONTENT_TYPE).get))
       }
 
       builder.execute[HttpResponse]

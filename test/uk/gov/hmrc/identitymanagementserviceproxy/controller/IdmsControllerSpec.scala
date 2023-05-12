@@ -46,13 +46,15 @@ class IdmsControllerSpec extends AsyncFreeSpec
           |}
           |""".stripMargin
 
+      val requestBody = """{"cheese":"crackers"}"""
+
       stubFor(
         post(urlEqualTo("/identity-management-service-stubs/identity"))
           .withHeader(ACCEPT, equalTo(ContentTypes.JSON))
           .withHeader(CONTENT_TYPE, equalTo(ContentTypes.JSON))
           .withHeader(AUTHORIZATION, equalTo("Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="))
           .withRequestBody(
-            equalToJson("""{"cheese":"crackers"}""")
+            equalToJson(requestBody)
           )
           .willReturn(
             aResponse()
@@ -68,7 +70,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
             (ACCEPT, "application/json"),
             (CONTENT_TYPE, "application/json"),
           )))
-          .withBody("""{"cheese":"crackers"}""")
+          .withBody(requestBody)
         val result = route(application, request).value
 
         status(result) mustBe OK

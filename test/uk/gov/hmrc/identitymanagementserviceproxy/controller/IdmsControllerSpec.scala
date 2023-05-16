@@ -63,6 +63,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
             (AUTHORIZATION, "Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="),
             (ACCEPT, "application/json"),
             (CONTENT_TYPE, "application/json"),
+            ("x-api-key", "cheese")
           )))
           .withBody(requestBody)
         val result = route(application, request).value

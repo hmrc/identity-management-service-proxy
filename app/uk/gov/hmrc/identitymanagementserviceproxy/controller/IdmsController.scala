@@ -56,6 +56,8 @@ class IdmsController @Inject()(
   def forward: Action[ByteString] = Action(parse.byteString).async {
     implicit request =>
 
+      logger.info(s"x-api-key header present: ${request.headers.get("x-api-key").isDefined}")
+
       var builder = httpClient
         .httpVerb(request.method, request.path.replaceFirst("/identity-management-service-proxy", ""))
 

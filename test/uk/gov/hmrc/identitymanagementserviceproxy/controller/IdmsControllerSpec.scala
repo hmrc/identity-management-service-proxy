@@ -26,7 +26,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 import play.api.test.{FakeHeaders, FakeRequest}
-import play.api.{Application, Configuration, Logger}
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -66,7 +66,6 @@ class IdmsControllerSpec extends AsyncFreeSpec
             ("x-api-key", "cheese")
           )))
           .withBody(requestBody)
-
         val result = route(application, request).value
 
         status(result) mustBe OK

@@ -101,6 +101,30 @@ class IdmsControllerSpec extends AsyncFreeSpec
         contentAsString(result) mustBe responseBody
       }
     }
+
+    "must strip out an x-api-key header" in {
+      val xApiKeyHeaderName = "x-api-key"
+
+      stubFor(
+        get(urlEqualTo("/identity-management-service-stubs/identity/12345"))
+          .withHeader(xApiKeyHeaderName, absent())
+          .willReturn(
+            aResponse()
+          )
+      )
+
+      val application = buildApplication()
+      running(application) {
+        val request = FakeRequest(GET, "/identity-management-service-proxy/identity/12345")
+          .withHeaders(FakeHeaders(Seq(
+            (xApiKeyHeaderName, "test-api-key")
+          )))
+
+        val result = route(application, request).value
+
+        status(result) mustBe OK
+      }
+    }
   }
 
   "PUT request" - {

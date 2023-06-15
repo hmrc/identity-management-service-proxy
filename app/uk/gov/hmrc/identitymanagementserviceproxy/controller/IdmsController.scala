@@ -17,7 +17,6 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import akka.util.{ByteString, CompactByteString}
-import play.api.Logging
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -30,12 +29,11 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-
 @Singleton
 class IdmsController @Inject()(
                                 override val controllerComponents: ControllerComponents,
                                 httpClient: HttpClientV2,
-                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
+                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) {
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
     def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
@@ -55,9 +53,6 @@ class IdmsController @Inject()(
 
   def forward: Action[ByteString] = Action(parse.byteString).async {
     implicit request =>
-
-      logger.info(s"x-api-key header present: ${request.headers.get("x-api-key").isDefined}")
-
       var builder = httpClient
         .httpVerb(request.method, request.path.replaceFirst("/identity-management-service-proxy", ""))
 

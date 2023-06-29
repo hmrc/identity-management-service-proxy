@@ -17,6 +17,7 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import akka.util.{ByteString, CompactByteString}
+import play.api.Logging
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -33,7 +34,7 @@ import scala.concurrent.ExecutionContext
 class IdmsController @Inject()(
                                 override val controllerComponents: ControllerComponents,
                                 httpClient: HttpClientV2,
-                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) {
+                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
     def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
@@ -56,6 +57,13 @@ class IdmsController @Inject()(
       var builder = httpClient
         .httpVerb(request.method, request.path.replaceFirst("/identity-management-service-proxy", ""))
 
+      request.headers.headers.foreach(header => {
+        Console.println(s"Inbound Header: ${header._1}: ${header._2}")
+        logger.info(s"Inbound Header: ${header._1}: ${header._2}")
+      })
+
+      logger.info(s"Inbound Header count: ${request.headers.headers.size}")
+
       request.headers.get(CONTENT_TYPE) match {
         case Some(ContentTypes.JSON) =>
           builder = builder.withBody(Json.parse(request.body.toArray))
@@ -69,14 +77,23 @@ class IdmsController @Inject()(
 
       builder.execute[HttpResponse]
         .map(
-          response =>
+          response => {
+            val outboundHeaders = buildHeaders(response.headers)
+
+            outboundHeaders.foreach(header => {
+              Console.println(s"Outbound Header: ${header._1}: ${header._2}")
+              logger.info(s"Outbound Header: ${header._1}: ${header._2}")
+            })
+
+            logger.info(s"Outbound Header count: ${outboundHeaders.size}")
             Result(
               ResponseHeader(
                 status = response.status,
-                headers = buildHeaders(response.headers)
+                headers = outboundHeaders
               ),
               body = buildBody(response.body, response.headers)
             )
+          }
         )
   }
 

@@ -67,6 +67,14 @@ class IdmsController @Inject()(
         builder = builder.setHeader((ACCEPT, request.headers.get(ACCEPT).get))
       }
 
+      builder = builder.transform(wsRequest => {
+        if (!wsRequest.headers.contains(AUTHORIZATION) && request.headers.get(AUTHORIZATION).isDefined) {
+          wsRequest.withHttpHeaders((AUTHORIZATION, request.headers.get(AUTHORIZATION).get))
+        } else {
+          wsRequest
+        }
+      })
+
       builder.execute[HttpResponse]
         .map(
           response =>

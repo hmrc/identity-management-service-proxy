@@ -75,21 +75,22 @@ class IdmsController @Inject()(
         builder = builder.setHeader((ACCEPT, request.headers.get(ACCEPT).get))
       }
 
+      builder.transform {
+        wsRequest =>
+          wsRequest.headers.foreach(
+            header =>
+              logger.info(s"Outbound header: ${header._1} = ${header._2}")
+          )
+          wsRequest
+      }
+
       builder.execute[HttpResponse]
         .map(
           response => {
-            val outboundHeaders = buildHeaders(response.headers)
-
-            outboundHeaders.foreach(header => {
-              Console.println(s"Outbound Header: ${header._1}: ${header._2}")
-              logger.info(s"Outbound Header: ${header._1}: ${header._2}")
-            })
-
-            logger.info(s"Outbound Header count: ${outboundHeaders.size}")
             Result(
               ResponseHeader(
                 status = response.status,
-                headers = outboundHeaders
+                headers = buildHeaders(response.headers)
               ),
               body = buildBody(response.body, response.headers)
             )

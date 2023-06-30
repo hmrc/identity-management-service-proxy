@@ -17,6 +17,7 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import akka.util.{ByteString, CompactByteString}
+import play.api.Logging
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -33,7 +34,7 @@ import scala.concurrent.ExecutionContext
 class IdmsController @Inject()(
                                 override val controllerComponents: ControllerComponents,
                                 httpClient: HttpClientV2,
-                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) {
+                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
     def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
@@ -69,6 +70,7 @@ class IdmsController @Inject()(
 
       builder = builder.transform(wsRequest => {
         if (!wsRequest.headers.contains(AUTHORIZATION) && request.headers.get(AUTHORIZATION).isDefined) {
+          logger.info("Outbound request has no auth header, setting explicitly from inbound.")
           wsRequest.withHttpHeaders((AUTHORIZATION, request.headers.get(AUTHORIZATION).get))
         } else {
           wsRequest

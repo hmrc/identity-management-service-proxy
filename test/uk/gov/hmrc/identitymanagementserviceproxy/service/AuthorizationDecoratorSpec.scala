@@ -1,22 +1,51 @@
+/*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.identitymanagementserviceproxy.service
 
-import org.scalatest.freespec.AsyncFreeSpec
+import org.mockito.ArgumentMatchers.any
+import org.mockito.{ArgumentMatchers, MockitoSugar}
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.test.Helpers.{AUTHORIZATION, POST}
-import play.api.test.{FakeHeaders, FakeRequest}
+import play.api.libs.ws.WSRequest
+import play.api.test.Helpers.{ACCEPT, AUTHORIZATION}
 
-class AuthorizationDecoratorSpec extends AsyncFreeSpec
-  with Matchers {
+class AuthorizationDecoratorSpec extends AnyFreeSpec
+  with Matchers with MockitoSugar {
 
   "Decorator " - {
-    "must not supply auth header if already present" in {
+    "must not add auth header if already present" in {
       val decorator = new AuthorizationDecorator
-      val request = FakeRequest(POST, "/identity-management-service-proxy/identity")
-        .withHeaders(FakeHeaders(Seq(
-          (AUTHORIZATION, "Cheese"))))
 
-      val decorated = decorator.decorate(request, Some("xyz"))
+      val wsRequest: WSRequest = mock[WSRequest]
+      when(wsRequest.headers).thenReturn(Map(AUTHORIZATION -> Seq("test-authorization")))
+      decorator.decorate(wsRequest, Some("xyz"))
 
+      verify(wsRequest, times(0)).addHttpHeaders(any())
+    }
+
+    "must add the auth header if not present" in {
+      val decorator = new AuthorizationDecorator
+
+      val wsRequest: WSRequest = mock[WSRequest]
+      when(wsRequest.headers).thenReturn(Map(ACCEPT -> Seq("test-content-type")))
+      decorator.decorate(wsRequest, Some("test-authorization"))
+
+      verify(wsRequest).addHttpHeaders(ArgumentMatchers.eq((AUTHORIZATION, "test-authorization")))
     }
   }
+
 }

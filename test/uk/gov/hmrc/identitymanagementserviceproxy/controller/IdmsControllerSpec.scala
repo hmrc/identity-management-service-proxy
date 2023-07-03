@@ -17,7 +17,7 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import com.github.tomakehurst.wiremock.client.WireMock.{status => _, _}
-import org.mockito.{ArgumentMatchers, Mockito, MockitoSugar}
+import org.mockito.{ArgumentMatchers, MockitoSugar}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -203,6 +203,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
                       application: Application,
                       authorizationDecorator: AuthorizationDecorator
                     )
+
   private def buildApplication(): Fixture = {
     val servicesConfig = new ServicesConfig(
       Configuration.from(Map(
@@ -212,7 +213,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
       ))
     )
 
-    val decorator = spy(new AuthorizationDecorator,true)
+    val decorator = spy(new AuthorizationDecorator,lenient = true)
 
     val build = new GuiceApplicationBuilder()
       .overrides(
@@ -220,7 +221,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
         bind[HttpClientV2].toInstance(httpClientV2),
         bind[AuthorizationDecorator].toInstance(decorator)
       )
-      .build
+      .build()
     Fixture(build, decorator)
   }
 

@@ -46,6 +46,16 @@ class AuthorizationDecoratorSpec extends AnyFreeSpec
 
       verify(wsRequest).addHttpHeaders(ArgumentMatchers.eq((AUTHORIZATION, "test-authorization")))
     }
+
+    "must not update the request if there isn't an Authorization header in the inbound request" in {
+      val decorator = new AuthorizationDecorator
+
+      val wsRequest: WSRequest = mock[WSRequest]
+      when(wsRequest.headers).thenReturn(Map.empty)
+      decorator.decorate(wsRequest, None)
+
+      verify(wsRequest, times(0)).addHttpHeaders(any())
+    }
   }
 
 }

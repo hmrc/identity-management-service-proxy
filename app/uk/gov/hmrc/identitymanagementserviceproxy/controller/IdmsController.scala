@@ -24,6 +24,7 @@ import play.api.mvc._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
+import uk.gov.hmrc.identitymanagementserviceproxy.service.AuthorizationDecorator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
@@ -34,7 +35,8 @@ import scala.concurrent.ExecutionContext
 class IdmsController @Inject()(
                                 override val controllerComponents: ControllerComponents,
                                 httpClient: HttpClientV2,
-                                servicesConfig: ServicesConfig)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
+                                servicesConfig: ServicesConfig,
+                                authorizationDecorator: AuthorizationDecorator)(implicit ec: ExecutionContext) extends BackendController(controllerComponents) with Logging {
 
   implicit class HttpClientExtensions(httpClient: HttpClientV2) {
     def httpVerb(method: String, relativePath: String)(implicit hc: HeaderCarrier): RequestBuilder = {
@@ -68,14 +70,7 @@ class IdmsController @Inject()(
         builder = builder.setHeader((ACCEPT, request.headers.get(ACCEPT).get))
       }
 
-      builder = builder.transform(wsRequest => {
-        if (!wsRequest.headers.contains(AUTHORIZATION) && request.headers.get(AUTHORIZATION).isDefined) {
-          logger.info("Outbound request has no auth header, setting explicitly from inbound.")
-          wsRequest.withHttpHeaders((AUTHORIZATION, request.headers.get(AUTHORIZATION).get))
-        } else {
-          wsRequest
-        }
-      })
+      builder = builder.transform(wsRequest => authorizationDecorator.decorate(wsRequest, request.headers.get(AUTHORIZATION)))
 
       builder.execute[HttpResponse]
         .map(

@@ -18,6 +18,7 @@ package uk.gov.hmrc.identitymanagementserviceproxy.config
 
 import com.google.inject.AbstractModule
 import uk.gov.hmrc.identitymanagementserviceproxy.controller.{IdmsController, IdmsRouter}
+import uk.gov.hmrc.identitymanagementserviceproxy.service.AuthorizationDecorator
 
 class Module extends AbstractModule {
 
@@ -25,5 +26,6 @@ class Module extends AbstractModule {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[IdmsRouter]).asEagerSingleton()
     bind(classOf[IdmsController]).asEagerSingleton()
+    bind(classOf[AuthorizationDecorator]).asEagerSingleton()
   }
 }

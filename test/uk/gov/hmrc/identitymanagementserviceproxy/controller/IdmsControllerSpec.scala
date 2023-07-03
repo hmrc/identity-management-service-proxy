@@ -17,6 +17,7 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import com.github.tomakehurst.wiremock.client.WireMock.{status => _, _}
+import org.mockito.{ArgumentMatchers, Mockito, MockitoSugar}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -29,13 +30,15 @@ import play.api.test.{FakeHeaders, FakeRequest}
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.test.{HttpClientV2Support, WireMockSupport}
+import uk.gov.hmrc.identitymanagementserviceproxy.service.AuthorizationDecorator
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class IdmsControllerSpec extends AsyncFreeSpec
   with Matchers
   with WireMockSupport
   with HttpClientV2Support
-  with OptionValues {
+  with OptionValues
+  with MockitoSugar {
 
   "POST request" - {
     "must be forwarded with headers" in {
@@ -56,19 +59,23 @@ class IdmsControllerSpec extends AsyncFreeSpec
           )
       )
 
-      val application = buildApplication()
-      running(application) {
+      val fixture = buildApplication()
+
+      running(fixture.application) {
+
         val request = FakeRequest(POST, "/identity-management-service-proxy/identity")
           .withHeaders(FakeHeaders(Seq(
             (AUTHORIZATION, "Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="),
             (ACCEPT, "application/json"),
             (CONTENT_TYPE, "application/json"),
             ("x-api-key", "cheese")
-          )))
+        )))
           .withBody(requestBody)
-        val result = route(application, request).value
+
+        val result = route(fixture.application, request).value
 
         status(result) mustBe OK
+        verify(fixture.authorizationDecorator).decorate(ArgumentMatchers.any(), ArgumentMatchers.any())
         contentAsString(result) mustBe responseBody
       }
     }
@@ -88,16 +95,17 @@ class IdmsControllerSpec extends AsyncFreeSpec
           )
       )
 
-      val application = buildApplication()
-      running(application) {
+      val fixture = buildApplication()
+      running(fixture.application) {
         val request = FakeRequest(GET, "/identity-management-service-proxy/identity/12345")
           .withHeaders(FakeHeaders(Seq(
             (AUTHORIZATION, "Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="),
             (ACCEPT, "application/json")
           )))
-        val result = route(application, request).value
+        val result = route(fixture.application, request).value
 
         status(result) mustBe OK
+        verify(fixture.authorizationDecorator).decorate(ArgumentMatchers.any(), ArgumentMatchers.any())
         contentAsString(result) mustBe responseBody
       }
     }
@@ -113,14 +121,14 @@ class IdmsControllerSpec extends AsyncFreeSpec
           )
       )
 
-      val application = buildApplication()
-      running(application) {
+      val fixture = buildApplication()
+      running(fixture.application) {
         val request = FakeRequest(GET, "/identity-management-service-proxy/identity/12345")
           .withHeaders(FakeHeaders(Seq(
             (xApiKeyHeaderName, "test-api-key")
           )))
 
-        val result = route(application, request).value
+        val result = route(fixture.application, request).value
 
         status(result) mustBe OK
       }
@@ -146,8 +154,8 @@ class IdmsControllerSpec extends AsyncFreeSpec
           )
       )
 
-      val application = buildApplication()
-      running(application) {
+      val fixture = buildApplication()
+      running(fixture.application) {
         val request = FakeRequest(PUT, "/identity-management-service-proxy/identity/1234")
           .withHeaders(FakeHeaders(Seq(
             (AUTHORIZATION, "Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="),
@@ -155,9 +163,9 @@ class IdmsControllerSpec extends AsyncFreeSpec
             (CONTENT_TYPE, "application/json"),
           )))
           .withBody(requestBody)
-        val result = route(application, request).value
-
+        val result = route(fixture.application, request).value
         status(result) mustBe OK
+        verify(fixture.authorizationDecorator).decorate(ArgumentMatchers.any(), ArgumentMatchers.any())
         contentAsString(result) mustBe responseBody
       }
     }
@@ -176,21 +184,26 @@ class IdmsControllerSpec extends AsyncFreeSpec
           )
       )
 
-      val application = buildApplication()
-      running(application) {
+      val fixture = buildApplication()
+      running(fixture.application) {
         val request = FakeRequest(DELETE, "/identity-management-service-proxy/identity/12345")
           .withHeaders(FakeHeaders(Seq(
             (AUTHORIZATION, "Basic dGVzdC1lbXMtY2xpZW50LWlkOnRlc3QtZW1zLXNlY3JldA=="),
             (ACCEPT, "application/json")
           )))
-        val result = route(application, request).value
-
+        val result = route(fixture.application, request).value
         status(result) mustBe OK
+        verify(fixture.authorizationDecorator).decorate(ArgumentMatchers.any(), ArgumentMatchers.any())
+        contentAsString(result) mustBe empty
       }
     }
   }
 
-  private def buildApplication(): Application = {
+  case class Fixture(
+                      application: Application,
+                      authorizationDecorator: AuthorizationDecorator
+                    )
+  private def buildApplication(): Fixture = {
     val servicesConfig = new ServicesConfig(
       Configuration.from(Map(
         "microservice.services.idms.host" -> wireMockHost,
@@ -199,12 +212,16 @@ class IdmsControllerSpec extends AsyncFreeSpec
       ))
     )
 
-    new GuiceApplicationBuilder()
+    val decorator = spy(new AuthorizationDecorator,true)
+
+    val build = new GuiceApplicationBuilder()
       .overrides(
         bind[ServicesConfig].toInstance(servicesConfig),
-        bind[HttpClientV2].toInstance(httpClientV2)
+        bind[HttpClientV2].toInstance(httpClientV2),
+        bind[AuthorizationDecorator].toInstance(decorator)
       )
-      .build()
+      .build
+    Fixture(build, decorator)
   }
 
 }

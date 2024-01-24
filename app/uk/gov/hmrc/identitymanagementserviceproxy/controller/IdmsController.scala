@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
-import akka.util.{ByteString, CompactByteString}
 import play.api.Logging
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.json.Json
@@ -27,6 +26,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.identitymanagementserviceproxy.service.AuthorizationDecorator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import org.apache.pekko.util.{ByteString, CompactByteString}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext

@@ -20,7 +20,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.{ArgumentMatchers, MockitoSugar}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.libs.ws.WSRequest
+import play.api.http.HeaderNames
+import play.api.libs.ws.{StandaloneWSRequest, WSRequest}
 import play.api.test.Helpers.{ACCEPT, AUTHORIZATION}
 
 class AuthorizationDecoratorSpec extends AnyFreeSpec
@@ -42,6 +43,7 @@ class AuthorizationDecoratorSpec extends AnyFreeSpec
 
       val wsRequest: WSRequest = mock[WSRequest]
       when(wsRequest.headers).thenReturn(Map(ACCEPT -> Seq("test-content-type")))
+      when(wsRequest.addHttpHeaders((AUTHORIZATION, "test-authorization"))).thenReturn(wsRequest)
       decorator.decorate(wsRequest, Some("test-authorization"))
 
       verify(wsRequest).addHttpHeaders(ArgumentMatchers.eq((AUTHORIZATION, "test-authorization")))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
-import akka.util.{ByteString, CompactByteString}
+import org.apache.pekko.util.{ByteString, CompactByteString}
 import play.api.Logging
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.json.Json

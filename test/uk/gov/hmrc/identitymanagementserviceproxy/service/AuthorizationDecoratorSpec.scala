@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class AuthorizationDecoratorSpec extends AnyFreeSpec
 
       val wsRequest: WSRequest = mock[WSRequest]
       when(wsRequest.headers).thenReturn(Map(ACCEPT -> Seq("test-content-type")))
+      when(wsRequest.addHttpHeaders((AUTHORIZATION, "test-authorization"))).thenReturn(wsRequest)
       decorator.decorate(wsRequest, Some("test-authorization"))
 
       verify(wsRequest).addHttpHeaders(ArgumentMatchers.eq((AUTHORIZATION, "test-authorization")))

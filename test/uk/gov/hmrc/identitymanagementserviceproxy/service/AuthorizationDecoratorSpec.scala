@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.{ArgumentMatchers, MockitoSugar}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import play.api.http.HeaderNames
-import play.api.libs.ws.{StandaloneWSRequest, WSRequest}
+import play.api.libs.ws.WSRequest
 import play.api.test.Helpers.{ACCEPT, AUTHORIZATION}
 
 class AuthorizationDecoratorSpec extends AnyFreeSpec

@@ -1,7 +1,7 @@
 # identity-management-service-proxy
 
 Proxy for the Identity Management Service (IDMS). Serves as the IDMS in a 
-secondary API Hub environment. Forwards calls to the real IDMS via HODS Proxy
+secondary Integration Hub environment. Forwards calls to the real IDMS via HODS Proxy
 and Scrubbing Centre.
 
 In environments without a real IDMS then this proxy forwards to the IDMS stub,

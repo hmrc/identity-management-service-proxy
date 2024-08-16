@@ -27,6 +27,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.identitymanagementserviceproxy.service.AuthorizationDecorator
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import play.api.libs.ws.writeableOf_JsValue
+import play.api.libs.ws.writeableOf_Bytes
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext

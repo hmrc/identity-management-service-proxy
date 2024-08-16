@@ -17,10 +17,12 @@
 package uk.gov.hmrc.identitymanagementserviceproxy.controller
 
 import com.github.tomakehurst.wiremock.client.WireMock.{status => _, _}
-import org.mockito.{ArgumentMatchers, MockitoSugar}
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.{verify, spy}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.ContentTypes
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -213,7 +215,7 @@ class IdmsControllerSpec extends AsyncFreeSpec
       ))
     )
 
-    val decorator = spy(new AuthorizationDecorator,lenient = true)
+    val decorator = spy(new AuthorizationDecorator)
 
     val build = new GuiceApplicationBuilder()
       .overrides(

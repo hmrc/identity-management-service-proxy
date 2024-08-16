@@ -26,7 +26,7 @@ All requests to this service starting with `/identity-management-service-proxy/i
 are forwarded to IDMS. The incoming `Authorization` header is passed on. This
 service does not add authorisation.
 
-The IDMS to use is configured in `application.conf` in these settings:
+The IDMS to use is configured in `application.conf` in these settings: 
 - `microservice.services.idms`
 
 ## Using the service
